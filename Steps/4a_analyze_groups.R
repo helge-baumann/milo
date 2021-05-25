@@ -1,15 +1,12 @@
 # Analyse Verteilung von Löhnen, Haushalte und Personen
 # Zuweisung Mindestlohnhaushalte
 
-# Verteilung der Angaben zu Monatslöhnen
-table(is.na(evs18$stunde_1), evs18$M0011110_01) # realistisch; 0 = kein Grundlohn?
-summary(evs18$stunde_1[evs18$M0011110_01 == 0])
-summary(evs18$stunde_1[evs18$M0011110_01 == 1])
-summary(evs18$stunde_1[evs18$M0011110_01 == 2])
-summary(evs18$stunde_1[evs18$M0011110_01 == 3])
-
 # Anteil Personen in Einkommens-Kategorien
 P <- data.frame(
+  "Lohn" = c(
+    "unter 8 Euro", "8 bis unter 8,50 Euro", "8,50 bis unter 8,84 Euro",
+    "8,84 bis unter 9,50 Euro", "9,50 bis unter 12 Euro", "12 Euro und mehr"
+  ),
   "EVS_2013" = c(
     sum_pers(evs13, "stunde", lower = 0, upper = 8), # sum_pers: Siehe functions
     sum_pers(evs13, "stunde", lower = 8, upper = 8.5),
@@ -28,41 +25,39 @@ P <- data.frame(
   )
 )
 
-row.names(P) <- c(
-  "unter 8 Euro", "8 bis unter 8,50 Euro", "8,50 bis unter 8,84 Euro",
-  "8,84 bis unter 9,50 Euro", "9,50 bis unter 12 Euro", "12 Euro und mehr"
-)
+
 
 # Anteil Haushalte in Einkommens-Kategorien 
 HH <- data.frame(
+  "Lohn" = c(
+    "unter 8 Euro", "8 bis unter 8,50 Euro", "8,50 bis unter 8,84 Euro",
+    "8,84 bis unter 9,50 Euro", "9,50 bis unter 12 Euro", "12 Euro und mehr"
+  ),
   "EVS_2013" = c(
-    sum_hh(evs13, "stunde", lower = 0, upper = 8),
-    sum_hh(evs13, "stunde", lower = 8, upper = 8.5),
-    sum_hh(evs13, "stunde", lower = 8.5, upper = 8.84),
-    sum_hh(evs13, "stunde", lower = 8.84, upper = 9.5),
-    sum_hh(evs13, "stunde", lower = 9.5, upper = 12),
-    sum_hh(evs13, "stunde", lower = 12, upper = Inf)
+    sum_hh(evs13, "stunde", lower = 0, upper = 8, w=evs13$EF107),
+    sum_hh(evs13, "stunde", lower = 8, upper = 8.5, w=evs13$EF107),
+    sum_hh(evs13, "stunde", lower = 8.5, upper = 8.84, w=evs13$EF107),
+    sum_hh(evs13, "stunde", lower = 8.84, upper = 9.5, w=evs13$EF107),
+    sum_hh(evs13, "stunde", lower = 9.5, upper = 12, w=evs13$EF107),
+    sum_hh(evs13, "stunde", lower = 12, upper = Inf, w=evs13$EF107)
   ),
   "EVS_2018" = c(
-    sum_hh(evs18, "stunde", lower = 0, upper = 8),
-    sum_hh(evs18, "stunde", lower = 8, upper = 8.5),
-    sum_hh(evs18, "stunde", lower = 8.5, upper = 8.84),
-    sum_hh(evs18, "stunde", lower = 8.84, upper = 9.5),
-    sum_hh(evs18, "stunde", lower = 9.5, upper = 12),
-    sum_hh(evs18, "stunde", lower = 12, upper = Inf)
+    sum_hh(evs18, "stunde", lower = 0, upper = 8, w=evs18$EF107),
+    sum_hh(evs18, "stunde", lower = 8, upper = 8.5, w=evs18$EF107),
+    sum_hh(evs18, "stunde", lower = 8.5, upper = 8.84, w=evs18$EF107),
+    sum_hh(evs18, "stunde", lower = 8.84, upper = 9.5, w=evs18$EF107),
+    sum_hh(evs18, "stunde", lower = 9.5, upper = 12, w=evs18$EF107),
+    sum_hh(evs18, "stunde", lower = 12, upper = Inf, w=evs18$EF107)
   )
 )
 
-row.names(HH) <- c(
-  "unter 8 Euro", "8 bis unter 8,50 Euro", "8,50 bis unter 8,84 Euro",
-  "8,84 bis unter 9,50 Euro", "9,50 bis unter 12 Euro", "12 Euro und mehr"
-)
+
 
 # Gruppen zu Mindestlohnhaushalten zuweisen
 
 # 2013
-lower_milo_2013 <- 8.5*0.985 # untere Grenze
-upper_milo_2013 <- 8.5*0.985+1.5 # mittlere Grenze
+lower_milo_2013 <- 8.84 # untere Grenze
+upper_milo_2013 <- 8.84+1.5 # mittlere Grenze
 
 evs13 <- evs13 %>% group_by(EF2U2) %>% 
   mutate(lohn_empfänger = 
