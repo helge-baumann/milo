@@ -1,7 +1,7 @@
 
-# Löhne generieren----
-
 for (i in 1:6) { # für alle Personen im Haushalt, 1-6
+  
+ 
    
   # EVS 2013
   evs13 <- evs13 %>%
@@ -9,14 +9,13 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
       "lohn_{i}" :=
         if_else(
           get(paste0("EF", 7 + i, "U3")) %in% 1948:1994 & # Alter: 18 bis 65
-            #Altersbegrenzung von DIW Studie bei 64, Renteneintritt aber über Vollendung 65, 
-            #danach wenig Stundenlöhne in EVS
+            #Altersbegrenzung von DIW Studie bei 64, Renteneintritt aber über Vollendung 65, danach wenig Stundenlöhne in EVS
             get(paste0("EF", 112, "U", i)) == 0 & # ohne Personen mit Abfindungen etc.
-            get(paste0("EF", 153, "U", i)) == 0 & # ohne Personen mit Mutterschaftsgeld
-            get(paste0("EF", 158, "U", i)) == 0 & # ohne Personen mit Elterngeld
+            get(paste0("EF", 153, "U", i)) != 0 & # ohne Personen mit Mutterschaftsgeld
+            get(paste0("EF", 158, "U", i)) != 0 & # ohne Personen mit Elterngeld
             #get(paste0("EF", 7 + i, "U8")) != 4 & # keine Beamten
             #get(paste0("EF", 7 + i, "U13")) == 1 & # vollständige Angaben
-            get(paste0("EF", 7 + i,  "U14")) %in% c(1, 2) & # Arbeitnehmer
+            get(paste0("EF", , "U14")) %in% c(1, 2) & # Arbeitnehmer
             get(paste0("EF", 7 + i, "U16")) > 0 & # Angabe zur Arbeitszeit
             get(paste0("EF", 7 + i, "U12")) != 2 & # kein überwiegender Lebensunterhalt Altersteilzeit   
             get(paste0("EF", 119, "U", i)) == 0 & # keine Angabe bei Altersteilzeit Entgelt          
@@ -59,8 +58,8 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
           get(paste0("EF", 7 + i, "U3")) %in% 1953:1999 & # Alter: 18 bis 65
             #Altersbegrenzung von DIW Studie bei 64, Renteneintritt aber über Vollendung 65, danach wenig Stundenlöhne in EVS
             get(paste0("EF", 112, "U", i)) == 0 & # ohne Personen mit Abfindungen etc.
-            get(paste0("EF", 153, "U", i)) == 0 & # ohne Personen mit Mutterschaftsgeld
-            get(paste0("EF", 158, "U", i)) == 0 & # ohne Personen mit Elterngeld
+            get(paste0("EF", 153, "U", i)) != 0 & # ohne Personen mit Mutterschaftsgeld
+            get(paste0("EF", 158, "U", i)) != 0 & # ohne Personen mit Elterngeld
             #get(paste0("EF", 7 + i, "U9")) != 5 & # keine Beamten
             #get(paste0("EF", 7 + i, "U14")) == 1 & # vollständige Angaben 
             #(Stata: gen mark = 1 if EF109U1 > 0 & EF8U17 > 0 & EF8U14 != 1 & (EF8U15 == 1 | EF8U15 == 2)
@@ -100,83 +99,3 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
     paste0("Bruttostundenlohn Person ", i)
   
 }
-
-# Winsorizing----
-
-
-evs13 <- evs13 %>%
-  mutate(netto_oecd = EF62/oecd_weight, brutto=EF60) %>%
-  mutate(across(
-    starts_with(c("lohn", "monat", "stunde", "konsum", "c_imp", "cons", 
-                  "save_imp", "save", "netto_oecd", "brutto")), 
-    .fns = list(winsor = ~winsor(.))),
-    lohn_summe =  rowSums(.[paste0("lohn_", 1:6)], na.rm=T),
-    lohn_anteil = if_else(lohn_summe > 0, lohn_summe/brutto*100, NA_real_),
-    lohn_anteil_winsor = winsor(lohn_anteil)
-    ) 
-
-evs18 <- evs18 %>%
-  mutate(netto_oecd = EF62/oecd_weight, brutto=EF60) %>%
-  mutate(across(
-    starts_with(c("lohn", "monat", "stunde", "konsum", "c_imp", "cons", 
-                  "save_imp", "save", "netto_oecd", "brutto")), 
-    .fns = list(winsor = ~winsor(.))),
-    lohn_summe =  rowSums(.[paste0("lohn_", 1:6)], na.rm=T),
-    lohn_anteil = if_else(lohn_summe > 0, lohn_summe/brutto*100, NA_real_),
-    lohn_anteil_winsor = winsor(lohn_anteil)
-  ) 
-
-# Plausibilitätscheck
-ws <- names(evs13)[str_detect(names(evs13), "winsor") ]
-ws_o <- str_remove_all(ws, "_winsor")
-
-
-winsor_13 <- evs13 %>% 
-  select(ws, ws_o) %>%
-  summarise_all(.funs = list(mmin = ~ min(x = ., na.rm=T),
-                             mmedian = ~ median(x =., na.rm=T),
-                             mmean = ~mean(x=., na.rm=T),
-                             mmax = ~ max(x = ., na.rm=T))) %>%
-  pivot_longer(
-    everything(),
-    names_to = c('.value', 'Wert'), 
-    names_sep="_m") 
- 
-  
-names(winsor_13)[!str_detect(names(winsor_13), "winsor")] <- 
-  paste0(names(winsor_13)[!str_detect(names(winsor_13), "winsor")], "_winsor_ohne")
-
-write.csv2(winsor_13 %>%
-  pivot_longer(
-      -Wert_winsor_ohne,
-      names_to = c('.value', 'Wert2'), 
-      names_sep="_winso") %>%
-  select(ws_o) %>%
-    t(),
-  "Output/Winsor_EVS13.csv"
-)
-
-
-winsor_18 <- evs18 %>% 
-  select(ws, ws_o) %>%
-  summarise_all(.funs = list(mmin = ~ min(x = ., na.rm=T),
-                             mmedian = ~ median(x =., na.rm=T),
-                             mmean = ~mean(x=., na.rm=T),
-                             mmax = ~ max(x = ., na.rm=T))) %>%
-  pivot_longer(
-    everything(),
-    names_to = c('.value', 'Wert'), 
-    names_sep="_m") 
-
-names(winsor_18)[!str_detect(names(winsor_18), "winsor")] <- 
-  paste0(names(winsor_18)[!str_detect(names(winsor_18), "winsor")], "_winsor_ohne")
-
-write.csv2(winsor_18 %>%
-             pivot_longer(
-               -Wert_winsor_ohne,
-               names_to = c('.value', 'Wert2'), 
-               names_sep="_winso") %>%
-             select(ws_o) %>%
-             t(),
-           "Output/Winsor_EVS18.csv"
-)

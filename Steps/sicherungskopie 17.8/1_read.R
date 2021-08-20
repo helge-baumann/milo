@@ -1,5 +1,6 @@
 # In den Daten für 2008 fehlen zentrale Variablen für die Vergleichbarkeit. 
 
+
 # Laden der EVS 2008 und Umwandlung in tibble()
 evs08 <- read_dta( "./Daten/EVS/suf_evs_2008_aagshb_gf3_slr/daten/evs_2008.dta")
 evs08 <- as_tibble(evs08)
@@ -14,7 +15,7 @@ evs13 <- as_tibble(evs13)
 # Es werden die Daten nach dem Update von April eingelesen
 #Rohdaten: read_dta( "./Daten/EVS/suf_evs_2018_aagshb_gf3_slr/daten/evs_2018.dta")
 #wurden ersetzt durch imputierte Daten
-evs18 <- read_dta( "./Daten/EVS/evs_2018_imputiert.dta")
+evs13 <- read_dta( "./Daten/EVS/evs_2018_imputiert.dta")
 evs18 <- as_tibble(evs18)
 
 
@@ -25,5 +26,3 @@ monat <-
 evs18 <- evs18 %>%
   left_join(monat, by=c("EF2U2" = "ef2u2"))
 
-# Deflationierung
-defl <- read.csv2("Daten/Deflationierung.csv", header=F)
