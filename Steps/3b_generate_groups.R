@@ -79,7 +79,9 @@ evs13 <-
            lohn_empfänger >= 1 & unterster_lohn >= lower_milo_2013 & unterster_lohn < q13[2] ~ 
              paste0("(2) Unterster Lohn im HH zwischen ML + 1 Euro und 2. Quartil"),
            lohn_empfänger >= 1 & unterster_lohn >= q13[2] & unterster_lohn <= q13[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil")
+             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
+           lohn_empfänger >= 1 & unterster_lohn > q13[3]  ~ 
+             paste0("(4) Unterster Lohn im HH oberhalb Median")
            ),
          milo_hh_dyn = case_when(
            lohn_empfänger >= 1 & unterster_lohn < q13[1] ~ 
@@ -87,7 +89,9 @@ evs13 <-
            lohn_empfänger >= 1 & unterster_lohn >= q13[1] & unterster_lohn < q13[2] ~ 
              paste0("(2) Unterster Lohn im HH zwischen 1. Dezil und 2. Quartil"),
            lohn_empfänger >= 1 & unterster_lohn >= q13[2] & unterster_lohn <= q13[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil")
+             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
+           lohn_empfänger >= 1 & unterster_lohn > q13[3]  ~ 
+             paste0("(4) Unterster Lohn im HH oberhalb Median")
          )
          )  
 
@@ -112,7 +116,9 @@ evs18 <-
            lohn_empfänger >= 1 & unterster_lohn >= lower_milo_2018 & unterster_lohn < q18[2] ~ 
              paste0("(2) Unterster Lohn im HH zwischen ML + 1 Euro und 2. Quartil"),
            lohn_empfänger >= 1 & unterster_lohn >= q18[2] & unterster_lohn <= q18[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil")
+             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
+           lohn_empfänger >= 1 & unterster_lohn > q18[3]  ~ 
+             paste0("(4) Unterster Lohn im HH oberhalb Median")
          ),
          milo_hh_dyn = case_when(
            lohn_empfänger >= 1 & unterster_lohn < q18[1] ~ 
@@ -120,6 +126,8 @@ evs18 <-
            lohn_empfänger >= 1 & unterster_lohn >= q18[1] & unterster_lohn < q18[2] ~ 
              paste0("(2) Unterster Lohn im HH zwischen 1. Dezil und 2. Quartil"),
            lohn_empfänger >= 1 & unterster_lohn >= q18[2] & unterster_lohn <= q18[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil")
+             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
+           lohn_empfänger >= 1 & unterster_lohn > q18[3]  ~ 
+             paste0("(4) Unterster Lohn im HH oberhalb Median")
          )
   )  

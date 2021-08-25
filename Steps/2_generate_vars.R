@@ -14,7 +14,7 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
             get(paste0("EF", 112, "U", i)) == 0 & # ohne Personen mit Abfindungen etc.
             get(paste0("EF", 153, "U", i)) == 0 & # ohne Personen mit Mutterschaftsgeld
             get(paste0("EF", 158, "U", i)) == 0 & # ohne Personen mit Elterngeld
-            #get(paste0("EF", 7 + i, "U8")) != 4 & # keine Beamten
+            get(paste0("EF", 7 + i, "U8")) != 3 & # keine mithelfenden Familienangehörigen
             #get(paste0("EF", 7 + i, "U13")) == 1 & # vollständige Angaben
             get(paste0("EF", 7 + i,  "U14")) %in% c(1, 2) & # Arbeitnehmer
             get(paste0("EF", 7 + i, "U16")) > 0 & # Angabe zur Arbeitszeit
@@ -33,11 +33,14 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
       "woche_{i}" := get(paste0("monat_", i)) / 4.33,
       # Bruttostundenlohn
       "stunde_{i}" := get(paste0("woche_", i)) / get(paste0("EF", 7 + i, "U16")),
-      "AN_{i}" :=
-        if_else(
-          get(paste0("EF", 7 + i, "U3")) %in% 1948:1994 & 
-            get(paste0("EF", 7 + i, "U14")) %in% c(1, 2), # Arbeitnehmer
-          1,  NA_real_    )
+      "AN_{i}" := if_else(
+        get(paste0("EF", 7 + i, "U3")) %in% 1953:1999 & 
+          get(paste0("EF", 7 + i, "U14")) %in% c(1, 2), # Arbeitnehmer
+        1,  NA_real_    ),
+      "ET_{i}" := if_else(
+        get(paste0("EF", 7 + i, "U3")) %in% 1953:1999 & 
+          get(paste0("EF", 7 + i, "U14")) %in% 1:5, # Erwerbstätige
+        1,  NA_real_    )
     )
   
   # Labels setzen
@@ -82,11 +85,15 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
       "woche_{i}" := get(paste0("monat_", i)) / 4.33,
       # Bruttostundenlöhne
       "stunde_{i}" := get(paste0("woche_", i)) / get(paste0("EF", 7 + i, "U17")),
-      "AN_{i}" :=
-        if_else(
+      "AN_{i}" := if_else(
           get(paste0("EF", 7 + i, "U3")) %in% 1953:1999 & 
-            get(paste0("EF", 7 + i, "U14")) %in% c(1, 2), # Arbeitnehmer
-          1,  NA_real_    )
+            get(paste0("EF", 7 + i, "U15")) %in% c(1, 2), # Arbeitnehmer
+          1,  NA_real_    ),
+      "ET_{i}" := if_else(
+        get(paste0("EF", 7 + i, "U3")) %in% 1953:1999 & 
+          get(paste0("EF", 7 + i, "U15")) %in% 1:5, # Erwerbstätige
+        1,  NA_real_    )
+      
     )
   
   # Labels setzen
@@ -111,6 +118,7 @@ evs13 <- evs13 %>%
                   "save_imp", "save", "netto_oecd", "brutto")), 
     .fns = list(winsor = ~winsor(.))),
     lohn_summe =  rowSums(.[paste0("lohn_", 1:6)], na.rm=T),
+    lohn_summe_winsor = winsor(lohn_summe),
     lohn_anteil = if_else(lohn_summe > 0, lohn_summe/brutto*100, NA_real_),
     lohn_anteil_winsor = winsor(lohn_anteil)
     ) 
@@ -122,6 +130,7 @@ evs18 <- evs18 %>%
                   "save_imp", "save", "netto_oecd", "brutto")), 
     .fns = list(winsor = ~winsor(.))),
     lohn_summe =  rowSums(.[paste0("lohn_", 1:6)], na.rm=T),
+    lohn_summe_winsor = winsor(lohn_summe),
     lohn_anteil = if_else(lohn_summe > 0, lohn_summe/brutto*100, NA_real_),
     lohn_anteil_winsor = winsor(lohn_anteil)
   ) 
@@ -129,7 +138,6 @@ evs18 <- evs18 %>%
 # Plausibilitätscheck
 ws <- names(evs13)[str_detect(names(evs13), "winsor") ]
 ws_o <- str_remove_all(ws, "_winsor")
-
 
 winsor_13 <- evs13 %>% 
   select(ws, ws_o) %>%
@@ -142,20 +150,18 @@ winsor_13 <- evs13 %>%
     names_to = c('.value', 'Wert'), 
     names_sep="_m") 
  
-  
 names(winsor_13)[!str_detect(names(winsor_13), "winsor")] <- 
-  paste0(names(winsor_13)[!str_detect(names(winsor_13), "winsor")], "_winsor_ohne")
+  paste0(
+    names(winsor_13)[!str_detect(names(winsor_13), "winsor")], 
+    "_winsor_ohne")
 
-write.csv2(winsor_13 %>%
+winsor_13 <- winsor_13 %>%
   pivot_longer(
-      -Wert_winsor_ohne,
-      names_to = c('.value', 'Wert2'), 
-      names_sep="_winso") %>%
+    -Wert_winsor_ohne,
+    names_to = c('.value', 'Wert2'), 
+    names_sep="_winso") %>%
   select(ws_o) %>%
-    t(),
-  "Output/Winsor_EVS13.csv"
-)
-
+  t()
 
 winsor_18 <- evs18 %>% 
   select(ws, ws_o) %>%
@@ -171,12 +177,28 @@ winsor_18 <- evs18 %>%
 names(winsor_18)[!str_detect(names(winsor_18), "winsor")] <- 
   paste0(names(winsor_18)[!str_detect(names(winsor_18), "winsor")], "_winsor_ohne")
 
-write.csv2(winsor_18 %>%
-             pivot_longer(
-               -Wert_winsor_ohne,
-               names_to = c('.value', 'Wert2'), 
-               names_sep="_winso") %>%
-             select(ws_o) %>%
-             t(),
-           "Output/Winsor_EVS18.csv"
-)
+winsor_18 <- winsor_18 %>%
+  pivot_longer(
+    -Wert_winsor_ohne,
+    names_to = c('.value', 'Wert2'), 
+    names_sep="_winso") %>%
+  select(ws_o) %>%
+  t()
+
+wb <- createWorkbook()
+addWorksheet(wb, "Winsorizing")
+writeData(wb, "Winsorizing", 
+          "Vergleich winsorizeder Löhne mit nicht-winsorizeden Löhnen, 2013 und 2018",
+          startCol=1, startRow=1)
+writeData(wb, "Winsorizing", winsor_13, startCol=1, startRow=6, rowNames=T, colNames=F)
+writeData(wb, "Winsorizing", winsor_18, startCol=2+ncol(winsor_13), startRow=6, colNames=F)
+writeData(wb, "Winsorizing", 
+          t(c(rep("2013", ncol(winsor_13)), rep("2018", ncol(winsor_18)))), 
+          startRow=3, startCol=2, colNames=F)
+writeData(wb, "Winsorizing", 
+          t(rep(rep(c("Min", "Median", "Mean", "Max"), each=2), 2)), 
+          startRow=4, startCol=2, colNames=F)
+writeData(wb, "Winsorizing", 
+          t(rep(c("mit Winsor", "ohne Winsor"), 8)), 
+          startRow=5, startCol=2, colNames=F)
+saveWorkbook(wb, "./Output/Tabellen für Berichte/Winsor_Vergleich.xlsx", overwrite=T)
