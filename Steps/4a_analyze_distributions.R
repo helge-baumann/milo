@@ -1,26 +1,27 @@
 # Verteilung der Haushalte
 
-# Verteilung der Haushalte insgesamt, nach Erwerbstätigen, mit abhängig Beschäftigten.
-# Für eine saubere Analyse und Auswertung packen wir jetzt mal 
-# die EVS 2013 und 2018 zusammen
+# Verteilung der Haushalte insgesamt, nach Erwerbstätigen, 
+  # mit abhängig Beschäftigten.
 
-evs13_red <- evs13 %>%
+# Vorab: Zusammenfassung evs13 und evs18 in gepoolten "EVS"
+
+EVS <- rbind(
+  evs13 %>%
   mutate(gewicht = EF107*(nrow(evs13)/sum(evs13$EF107)), 
          westost = EF1, bland = EF2U1, ID = EF2U2,
          welle = "2013") %>%
-  select(ID, welle, gewicht, westost, bland, EF38,
+  select(ID, welle, gewicht, westost, bland, EF38, EF35,
          starts_with(c("konsum", "cons", "c_imp", "save", "lohn", "monat", 
                        "stunde", "unterster", "milo_hh", "netto", "brutto", "hhtype",
-                       "oecd", "AN", "ET")))
-evs18_red <- evs18 %>%
+                       "oecd", "AN", "ET"))),
+  evs18 %>%
   mutate(gewicht = EF107*(nrow(evs13)/sum(evs13$EF107)), 
          westost = EF1, bland = EF2U1, ID = EF2U2, welle = "2018") %>%
-  select(ID, welle, gewicht, westost, bland, EF38,
+  select(ID, welle, gewicht, westost, bland, EF38, EF35,
          starts_with(c("konsum", "cons", "c_imp", "save", "lohn", "monat", 
                        "stunde", "unterster", "milo_hh", "netto", "brutto", "hhtype",
                        "oecd", "AN", "ET")))
-
-EVS <- rbind(evs13_red, evs18_red)
+)
 
 # Verteilung der Gruppen
 

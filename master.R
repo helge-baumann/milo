@@ -2,7 +2,7 @@
 # Mindestlohnevaluation: Deskriptive Analyse der EVS-Daten
 # Helge Emmler, Toralf Pusch
 # R-Version: 4.1.0
-# Letztes Update: 25.08.2021
+# Letztes Update: 24.09.2021
 ####################################
 
 # Präambel

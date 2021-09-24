@@ -60,12 +60,12 @@ HH <- data.frame(
 
 # Quartile der Stundenlöhne des Jahres 2013
 stundenloehne_2013 <- evs13 %>%
-  select(paste0("stunde_", 1:6, "_winsor")) %>%
-  pivot_longer(cols=everything(), names_to="person", values_to="stundenlohn")
+  select(paste0("stunde_", 1:6, "_winsor"), EF107) %>%
+  pivot_longer(cols=-EF107, names_to="person", values_to="stundenlohn")
 
-q13 <- wtd.quantile(stundenloehne_2013$stundenlohn, probs=c(.1, .25, .5), na.rm=T)
-
-lower_milo_2013 <- (8.5 + 1) / 100 * 98.6 # untere Grenze
+#neu: gewichtet
+q13 <- wtd.quantile(stundenloehne_2013$stundenlohn, stundenloehne_2013$EF107, 
+                    probs=c(.1, .2, .5), na.rm=T)
 
 evs13 <- 
   evs13 %>% 
@@ -73,36 +73,39 @@ evs13 <-
          unterster_lohn = pmap_dbl(
            list(stunde_1_winsor, stunde_2_winsor, stunde_3_winsor, 
                 stunde_4_winsor, stunde_5_winsor, stunde_6_winsor), min, na.rm=T),
-         milo_hh_stat = case_when(
-           lohn_empfänger >= 1 & unterster_lohn < lower_milo_2013 ~ 
-             paste0("(1) Unterster Lohn im HH unter ML + 1 Euro"), 
-           lohn_empfänger >= 1 & unterster_lohn >= lower_milo_2013 & unterster_lohn < q13[2] ~ 
-             paste0("(2) Unterster Lohn im HH zwischen ML + 1 Euro und 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn >= q13[2] & unterster_lohn <= q13[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn > q13[3]  ~ 
-             paste0("(4) Unterster Lohn im HH oberhalb Median")
-           ),
+         hoechster_lohn = pmap_dbl(
+           list(stunde_1_winsor, stunde_2_winsor, stunde_3_winsor, 
+                stunde_4_winsor, stunde_5_winsor, stunde_6_winsor), max, na.rm=T),
          milo_hh_dyn = case_when(
            lohn_empfänger >= 1 & unterster_lohn < q13[1] ~ 
              paste0("(1) Unterster Lohn im HH im 1. Dezil"), 
            lohn_empfänger >= 1 & unterster_lohn >= q13[1] & unterster_lohn < q13[2] ~ 
-             paste0("(2) Unterster Lohn im HH zwischen 1. Dezil und 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn >= q13[2] & unterster_lohn <= q13[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn > q13[3]  ~ 
-             paste0("(4) Unterster Lohn im HH oberhalb Median")
+             paste0("(2) Unterster Lohn im HH zwischen 1. und 2. Dezil"),
+           lohn_empfänger >= 1 & unterster_lohn >= q13[2] & unterster_lohn < q13[3] ~ 
+             paste0("(3) Unterster Lohn im HH zwischen 2. Dezil und Median"),
+           lohn_empfänger >= 1 & unterster_lohn >= q13[3]  ~ 
+             paste0("(4) Unterster Lohn im HH gleich oder oberhalb Median")
+         ),
+         milo_hh_max = case_when(
+           lohn_empfänger >= 1 & hoechster_lohn < q13[1] ~ 
+             paste0("(1) Höchster Lohn im HH im 1. Dezil"), 
+           lohn_empfänger >= 1 & hoechster_lohn >= q13[1] & hoechster_lohn < q13[2] ~ 
+             paste0("(2) Höchster Lohn im HH zwischen 1. und 2. Dezil"),
+           lohn_empfänger >= 1 & hoechster_lohn >= q13[2] & hoechster_lohn < q13[3] ~ 
+             paste0("(3) Höchster Lohn im HH zwischen 2. Dezil und Median"),
+           lohn_empfänger >= 1 & hoechster_lohn >= q13[3]  ~ 
+             paste0("(4) Höchster Lohn im HH gleich oder oberhalb Median")
          )
          )  
 
 # Quartile der Stundenlöhne des Jahres 2018
 stundenloehne_2018 <- evs18 %>%
-  select(paste0("stunde_", 1:6, "_winsor")) %>%
-  pivot_longer(cols=everything(), names_to="person", values_to="stundenlohn")
+  select(paste0("stunde_", 1:6, "_winsor"), EF107) %>%
+  pivot_longer(cols=-EF107, names_to="person", values_to="stundenlohn")
 
-q18 <- wtd.quantile(stundenloehne_2018$stundenlohn, probs=c(.1, .25, .5), na.rm=T)
-
-lower_milo_2018 <- 8.84+1 # untere Grenze
+# neu: gewichtet
+q18 <- wtd.quantile(stundenloehne_2018$stundenlohn, stundenloehne_2018$EF107, 
+                    probs=c(.1, .2, .5), na.rm=T)
 
 evs18 <- 
   evs18 %>% 
@@ -110,24 +113,27 @@ evs18 <-
          unterster_lohn = pmap_dbl(
            list(stunde_1_winsor, stunde_2_winsor, stunde_3_winsor, 
                 stunde_4_winsor, stunde_5_winsor, stunde_6_winsor), min, na.rm=T),
-         milo_hh_stat = case_when(
-           lohn_empfänger >= 1 & unterster_lohn < lower_milo_2018 ~ 
-             paste0("(1) Unterster Lohn im HH unter ML + 1 Euro"), 
-           lohn_empfänger >= 1 & unterster_lohn >= lower_milo_2018 & unterster_lohn < q18[2] ~ 
-             paste0("(2) Unterster Lohn im HH zwischen ML + 1 Euro und 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn >= q18[2] & unterster_lohn <= q18[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn > q18[3]  ~ 
-             paste0("(4) Unterster Lohn im HH oberhalb Median")
-         ),
+         hoechster_lohn = pmap_dbl(
+           list(stunde_1_winsor, stunde_2_winsor, stunde_3_winsor, 
+                stunde_4_winsor, stunde_5_winsor, stunde_6_winsor), max, na.rm=T),
          milo_hh_dyn = case_when(
            lohn_empfänger >= 1 & unterster_lohn < q18[1] ~ 
              paste0("(1) Unterster Lohn im HH im 1. Dezil"), 
            lohn_empfänger >= 1 & unterster_lohn >= q18[1] & unterster_lohn < q18[2] ~ 
-             paste0("(2) Unterster Lohn im HH zwischen 1. Dezil und 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn >= q18[2] & unterster_lohn <= q18[3] ~ 
-             paste0("(3) Unterster Lohn im HH im 2. Quartil"),
-           lohn_empfänger >= 1 & unterster_lohn > q18[3]  ~ 
-             paste0("(4) Unterster Lohn im HH oberhalb Median")
+             paste0("(2) Unterster Lohn im HH zwischen 1. und 2. Dezil"),
+           lohn_empfänger >= 1 & unterster_lohn >= q18[2] & unterster_lohn < q18[3] ~ 
+             paste0("(3) Unterster Lohn im HH zwischen 2. Dezil und Median"),
+           lohn_empfänger >= 1 & unterster_lohn >= q18[3]  ~ 
+             paste0("(4) Unterster Lohn im HH gleich oder oberhalb Median")
+         ),
+         milo_hh_max = case_when(
+           lohn_empfänger >= 1 & hoechster_lohn < q18[1] ~ 
+             paste0("(1) Höchster Lohn im HH im 1. Dezil"), 
+           lohn_empfänger >= 1 & hoechster_lohn >= q18[1] & hoechster_lohn < q18[2] ~ 
+             paste0("(2) Höchster Lohn im HH zwischen 1. und 2. Dezil"),
+           lohn_empfänger >= 1 & hoechster_lohn >= q18[2] & hoechster_lohn < q18[3] ~ 
+             paste0("(3) Höchster Lohn im HH zwischen 2. Dezil und Median"),
+           lohn_empfänger >= 1 & hoechster_lohn >= q18[3]  ~ 
+             paste0("(4) Höchster Lohn im HH gleich oder oberhalb Median")
          )
   )  
