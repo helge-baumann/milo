@@ -1,22 +1,26 @@
 ####################################
 # Mindestlohnevaluation: Deskriptive Analyse der EVS-Daten
 # Helge Emmler, Toralf Pusch
-# R-Version: 4.1.0
-# Letztes Update: 24.09.2021
+# R-Version: 4.1.1
+# Letztes Update: 19.10.2021
 ####################################
 
-# Präambel
+# Präambel----
 if (!("pacman" %in% installed.packages()[, 1])) install.packages("pacman")
 library(pacman)
 p_load(haven, dplyr, stringr, tidyr, ggplot2, gridExtra, kableExtra, Hmisc, 
        purrr, openxlsx)
 
-# Subdateien ausführen
-# in den Summenfunktionen wurden Stundenlöhne 0 ausgeklammert
-# in den Personensummen wurden HH-Gewichte als Näherungsgewichte für Personengewichte integriert
+# Outputordner einrichten
+dir.create(paste0("Output/Tabellen für Berichte/", Sys.Date()), showWarnings=F)
+
+# Subdateien ausführen----
+
+# Selbst geschriebene Funktionen laden
 source("./functions/functions.R", encoding="UTF-8")
 
-n <- 1:7 # wenn alles durchlaufen soll: 1:length(dir("./Steps"))
+# alle Skripte der Reihe nach ausführen (Unterordner "Steps")
+n <- 1:length(dir("./Steps")[str_detect(dir("./Steps"), "[:punct:]R$")])
 sapply(dir("./Steps", full.names=T)[n], source, encoding="UTF-8")
 
 # Session Info----

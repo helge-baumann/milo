@@ -1,5 +1,7 @@
 # Verteilung der Bruttostundenlöhne (Export to Excel)
 
+# Prüfen, ob verteilung vor und nach winsor korrekt
+
 # separater Datensatz Stundenlöhne Longformat (2013)
 bsl13 <- evs13 %>%
   select(starts_with("stunde")) %>%
@@ -27,13 +29,17 @@ bsl18_g <- bsl18 %>%
   count()
 
 bsl13_alle <- bsl13 %>%
-  mutate(winsor=if_else(str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
+  mutate(
+    winsor=if_else(
+      str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
   group_by(bsl_g, winsor) %>%
   count() %>%
   pivot_wider(names_from=winsor, values_from=-c(bsl_g, winsor))
 
 bsl18_alle <- bsl18 %>%
-  mutate(winsor=if_else(str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
+  mutate(
+    winsor=
+      if_else(str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
   group_by(bsl_g, winsor) %>%
   count() %>%
   pivot_wider(names_from=winsor, values_from=-c(bsl_g, winsor))
@@ -48,4 +54,7 @@ writeData(wb, "2013", bsl13 %>% filter(!is.na(bsl)))
 writeData(wb, "2018", bsl18 %>% filter(!is.na(bsl)))
 writeData(wb, "2013 Euro-Schritte", bsl13_alle)
 writeData(wb, "2018 Euro-Schritte", bsl18_alle)
-saveWorkbook(wb, "./Output/Tabellen für Berichte/Bruttostundenlöhne.xlsx", overwrite=T)
+saveWorkbook(wb, 
+             paste0("./Output/Tabellen für Berichte/", Sys.Date(), "/", 
+             "Tab_2-2_Bruttostundenlöhne.xlsx"), 
+             overwrite=T)
