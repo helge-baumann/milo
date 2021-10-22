@@ -1,57 +1,69 @@
 # Verteilung der Bruttostundenlöhne (Export to Excel)
 
-# Prüfen, ob verteilung vor und nach winsor korrekt
-
-# separater Datensatz Stundenlöhne Longformat (2013)
-bsl13 <- evs13 %>%
-  select(starts_with("stunde")) %>%
+# Separater Datensatz Stundenlöhne Longformat (2013)
+bsl13 <- 
+  evs13 %>%
+  select(starts_with("stunde"), "EF2U2") %>%
   pivot_longer(
     cols=starts_with("stunde"), names_to="person", values_to="bsl") %>%
+  filter(!is.na(bsl)) %>%
   mutate(bsl_g = cut(bsl, breaks=seq(-1, 700, 1), 
-                     labels=paste(-1:699, "bis", 0:700))) 
+                     labels=paste(-1:699, "bis", 0:700)),
+         EF2U2 = as.character(EF2U2)) %>%
+  mutate(bsl = round(bsl, digits=2)) %>%
+  mutate(person = str_remove(person, "stunde_")) %>%
+  separate(person, into=c("person", "winsor"), sep="_", fill="right") %>%
+  mutate(winsor = if_else(is.na(winsor), "ohne_winsor", "winsor")) %>%
+  pivot_wider(values_from=c(bsl, bsl_g), names_from=winsor)
+
   
 # separater Datensatz Stundenlöhne Longformat (2018)
 bsl18 <- evs18 %>%
-  select(starts_with("stunde")) %>%
+  select(starts_with("stunde"), "EF2U2") %>%
   pivot_longer(
     cols=starts_with("stunde"), names_to="person", values_to="bsl") %>%
+  filter(!is.na(bsl)) %>%
   mutate(bsl_g = cut(bsl, breaks=seq(-1, 700, 1), 
-                     labels=paste(-1:699, "bis", 0:700))) %>%
-  filter(!str_detect(person, "alt")) 
+                     labels=paste(-1:699, "bis", 0:700)),
+         EF2U2 = as.character(EF2U2)) %>%
+  mutate(bsl = round(bsl, digits=2)) %>%
+  mutate(person = str_remove(person, "stunde_")) %>%
+  separate(person, into=c("person", "winsor"), sep="_", fill="right") %>%
+  mutate(winsor = if_else(is.na(winsor), "ohne_winsor", "winsor")) %>%
+  pivot_wider(values_from=c(bsl, bsl_g), names_from=winsor)
 
-# gruppiert
-bsl13_g <- bsl13 %>%
-  group_by(person, bsl_g) %>%
-  count()
-
-bsl18_g <- bsl18 %>%
-  group_by(person, bsl_g) %>%
-  count()
-
+# alle Personen (ohne Differenzierung, ob Person 1, 2, 3, ...), gruppiert
 bsl13_alle <- bsl13 %>%
-  mutate(
-    winsor=if_else(
-      str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
-  group_by(bsl_g, winsor) %>%
-  count() %>%
-  pivot_wider(names_from=winsor, values_from=-c(bsl_g, winsor))
+  pivot_longer(c(bsl_g_ohne_winsor, bsl_g_winsor)) %>%
+  group_by(name) %>%
+  count(value) %>%
+  pivot_wider(names_from = name, values_from = n)
+
 
 bsl18_alle <- bsl18 %>%
-  mutate(
-    winsor=
-      if_else(str_detect(person, "winsor"), "mit winsor", "ohne winsor")) %>%
-  group_by(bsl_g, winsor) %>%
-  count() %>%
-  pivot_wider(names_from=winsor, values_from=-c(bsl_g, winsor))
+  pivot_longer(c(bsl_g_ohne_winsor, bsl_g_winsor)) %>%
+  group_by(name) %>%
+  count(value) %>%
+  pivot_wider(names_from = name, values_from = n)
 
 # abspeichern
 wb <- createWorkbook()
-addWorksheet(wb, "2013")
-addWorksheet(wb, "2018")
-addWorksheet(wb, "2013 Euro-Schritte")
-addWorksheet(wb, "2018 Euro-Schritte")
-writeData(wb, "2013", bsl13 %>% filter(!is.na(bsl)))
-writeData(wb, "2018", bsl18 %>% filter(!is.na(bsl)))
+sapply(
+ c("2013", "2018", "2013 Euro-Schritte", "2018 Euro-Schritte"),
+  function(x) addWorksheet(wb, x))
+writeData(wb, "2013", bsl13 )
+# Nachkommastellen
+addStyle(wb, sheet = "2013", 
+         style = createStyle(numFmt = "0.00"), 
+         rows = 2:nrow(bsl13)+1, 
+         cols = which(sapply(bsl13, class) == "numeric"), 
+         gridExpand = T)
+writeData(wb, "2018", bsl18 )
+addStyle(wb, sheet = "2018", 
+         style = createStyle(numFmt = "0.00"), 
+         rows = 2:nrow(bsl18)+1, 
+         cols = which(sapply(bsl18, class) == "numeric"), 
+         gridExpand = T)
 writeData(wb, "2013 Euro-Schritte", bsl13_alle)
 writeData(wb, "2018 Euro-Schritte", bsl18_alle)
 saveWorkbook(wb, 

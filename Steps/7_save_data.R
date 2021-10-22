@@ -1,6 +1,5 @@
 # Manipulierte Daten abspeichern
 
-dir.create(paste0("./Output/Daten/", Sys.Date()), showWarnings=F)
 write_dta(evs13, 
           paste0("./Output/Daten/", Sys.Date(), "/", Sys.Date(), 
                  "_EVS2013.dta"))

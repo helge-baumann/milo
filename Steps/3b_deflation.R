@@ -1,14 +1,13 @@
 # Deflationierung
 
 defl <- defl %>%
-  mutate(d2013 = V3 * 1/V4) # 2018 auf Referenz (100) setzen
+  mutate(d2013 = V3 * 1/V4) # 2018 als Referenz (100) setzen
 
 EVS_defl <- EVS %>% 
   mutate(
-    gesamt = "gesamt", 
+    gesamt = "alle", 
     lohn_haushalt = if_else(lohn_empfänger == 0, "HH ohne Lohnberechnung", 
                             "HH mit Lohnberechnung"),
-    hh_size=as.character(hhtype),
     ET_hh = as_factor(rowSums(!is.na(.[paste0("ET_", 1:6)]))),
     # Deflationierung
     lohn_summe_winsor = if_else(
