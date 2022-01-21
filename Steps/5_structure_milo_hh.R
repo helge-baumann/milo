@@ -15,16 +15,22 @@ Tab_5_1 <- EVS_defl %>%
     # Anzahl der Haushalte mit Beschäftigten (mit Lohnberechnung)
     `Haushalte mit Beschäftigten insgesamt__N` = 
       round(sum(lohn_empfänger > 0), digits=0), 
+    `Haushalte mit Beschäftigten insgesamt__w` = 
+      round(sum(gewicht), digits=0), 
     `Haushalte mit Beschäftigten insgesamt__%` = 
       round(wtd.mean(lohn_empfänger > 0, gewicht)*100, digits=1), 
     `Haushalte im Mindestlohn-Bereich__N` = 
       round(sum(milo_hh == "(1) Unterster Lohn im HH in Mindestlohngruppe"), digits=0), 
+    `Haushalte im Mindestlohn-Bereich__w` = 
+      round(sum(gewicht*(milo_hh == "(1) Unterster Lohn im HH in Mindestlohngruppe"), digits=0)), 
     `Haushalte im Mindestlohn-Bereich__%` = 
       round(wtd.mean(milo_hh == "(1) Unterster Lohn im HH in Mindestlohngruppe", 
                gewicht)*100, digits=1), 
     `Haushalte über dem Mindestlohn-Bereich__N` = 
       round(sum(milo_hh == "(2) Unterster Lohn im HH oberhalb Mindestlohn"), digits=0), 
-    `Haushalte über dem Mindestlohn-Bereich__%` = 
+    `Haushalte über dem Mindestlohn-Bereich__w` = 
+      round(sum(gewicht*(milo_hh == "(2) Unterster Lohn im HH oberhalb Mindestlohn"), digits=0)), 
+     `Haushalte über dem Mindestlohn-Bereich__%` = 
       round(wtd.mean(milo_hh == "(2) Unterster Lohn im HH oberhalb Mindestlohn", 
                gewicht)*100, digits=1)
   ) %>% 
@@ -160,7 +166,7 @@ Tab_5_23 <-
       round(sum(frauen_n*gewicht, na.rm=T)/sum(lohn_empfänger*gewicht)*100, digits=1),
     `Personenebene_Frauen-Anteil an den abh. Erwerbseinkommen__%` = 
       round(sum(lohn_frauen_sum*gewicht)/sum(lohn_summe_ohne_deflation*gewicht)*100, digits=1), 
-    # Vollzeit
+    # Minijobs
     `Personenebene_Geringfügige_Beschäftigung__N` = 
       round(sum(minijob_n, na.rm=T), digits=0), 
     `Personenebene_Geringfügige_Beschäftigung__%` = 

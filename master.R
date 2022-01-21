@@ -32,3 +32,10 @@ writeLines(
 
 
 
+#Was passiert in den Dateien?
+#1. Daten lesen
+#2. generate vars:
+# - Abgrengung der Stichprobe (Mindestlohn-Berechtigte)
+# - Lohnvariablen
+# - ARbeitszeit
+#3. 

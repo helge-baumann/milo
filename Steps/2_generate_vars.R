@@ -1,11 +1,12 @@
 # Personen-Variablen generieren (Löhne, Arbeitszeiten, Beschäftigung etc.)
 
 for (i in 1:6) { # für alle Personen im Haushalt, 1-6
+  
 
   # Basislohn definieren
   evs13 <- 
     evs13 %>%
-    # Wenn Mini/Midi-Job UND kein Grundlohn --> Lohn aus Nebenverdienst
+    # Wenn Mini/Midi-Job UND kein Grundlohn und kein Beamte --> Lohn aus Nebenverdienst
     mutate(
       "basislohn_{i}" := case_when(
         get(paste0("EF", 109, "U", i)) > 0 ~ get(paste0("EF", 109, "U", i)),
@@ -45,9 +46,10 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
           # Addition der Lohnbestandteile (Quartal)
           # EF118Ui Einnahmen aus Nebenerwerbstätigkeit nur Minijob Grundlohn 0
           # Basislohn (109 / 118), Sonderzahlungen 110, Bonus 113,
-          # Essengeldzuschuss 114, Werkswohnung 120u121, 128 Nahrungsmittel
+          # Essengeldzuschuss 114, Werkswohnung 120u121, 128 Nahrungsmittel, 
+          # 129 Getränke, 131 Speisen und Getränke außer Haus, 132 Übernachtungen
           rowSums(.[c(
-            paste0("EF", c(110, 113:114, 120:121, 128), "U", i),
+            paste0("EF", c(110, 113:114, 120:121, 128:129, 131:132), "U", i),
             paste0("basislohn_", i)
           )]), NA_real_
         ),
@@ -152,9 +154,10 @@ for (i in 1:6) { # für alle Personen im Haushalt, 1-6
           # Addition der Lohnbestandteile (Quartal)
           # EF118Ui Einnahmen aus Nebenerwerbstätigkeit nur Minijob (Grundlohn 0)
           # Basislohn (109 / 118), Sonderzahlungen 110, Bonus 113,
-          # Essengeldzuschuss 114, Werkswohnung 120u121, 128 Nahrungsmittel
+          # Essengeldzuschuss 114, Werkswohnung 120u121, 128 Nahrungsmittel,
+          # 129 Getränke, 131 Speisen und Getränke außer Haus, 132 Übernachtungen
           rowSums(.[c(
-            paste0("EF", c(110, 113:114, 120:121, 128), "U", i),
+            paste0("EF", c(110, 113:114, 120:121, 128:129, 131:132), "U", i),
             paste0("basislohn_", i)
           )]), NA_real_
         ),

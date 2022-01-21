@@ -473,31 +473,31 @@ Tab_6_6 <-
   group_by(welle, milo_hh, Variable, Wert) %>%
   summarise(
     # Mittelwerte
-    `(1) Konsum imputiert_mean` = 
+    `Konsum imputiert_mean` = 
       round(wtd.mean(c_imp_winsor/3, gewicht), digits=2),
-    `(2) Konsumquote mit Konsum imputiert_mean` =
-      round(wtd.mean((c_imp_winsor/3)/(netto_oecd_winsor*oecd_weight/3)*100, gewicht), digits=1),
-    `(3) Konsum imputiert äquivalenzgewichtet_mean` = 
+    `Konsum imputiert äquivalenzgewichtet_mean` = 
       round(wtd.mean(c_imp_winsor/oecd_weight/3, gewicht), digits=2),
-    `(4) Sparen imputiert_mean` = 
+    `Konsumquote mit Konsum imputiert_mean` =
+      round(wtd.mean(konsumquote_winsor*100, gewicht), digits=1),
+    `Sparen imputiert_mean` = 
       round(wtd.mean(save_imp_winsor/3, gewicht), digits=2),
-    `(5) Sparquote mit Ersparnis imputiert_mean` =
-      round(wtd.mean((save_imp_winsor/3)/(netto_oecd_winsor*oecd_weight/3)*100, gewicht), digits=1),
-    `(6) Sparen imputiert äquivalenzgewichtet_mean` = 
+    `Sparen imputiert äquivalenzgewichtet_mean` = 
       round(wtd.mean(save_imp_winsor/oecd_weight/3, gewicht), digits=2),
+    `Sparquote mit Ersparnis imputiert_mean` =
+      round(wtd.mean(sparquote_winsor*100, gewicht), digits=1),
     # N 
-    `(1) Konsum imputiert_N` = 
+    `Konsum imputiert_N` = 
       round(sum(!is.na(c_imp_winsor/3)), digits=0),
-    `(2) Konsumquote mit Konsum imputiert_N` =
-      round(sum(!is.na((c_imp_winsor/3)/(netto_oecd_winsor*oecd_weight/3)*100)), digits=0),
-    `(3) Konsum imputiert äquivalenzgewichtet_N` = 
+    `Konsum imputiert äquivalenzgewichtet_N` = 
       round(sum(!is.na((c_imp_winsor/oecd_weight/3))), digits=0),
-    `(4) Sparen imputiert_N` = 
+    `Konsumquote mit Konsum imputiert_N` =
+      round(sum(!is.na(konsumquote_winsor), digits=0)),
+    `Sparen imputiert_N` = 
       round(sum(!is.na((save_imp_winsor/3))), digits=0),
-    `(5) Sparquote mit Ersparnis imputiert_N` =
-      round(sum(!is.na(((save_imp_winsor/3)/(netto_oecd_winsor*oecd_weight/3)*100))), digits=0),
-    `(6) Sparen imputiert äquivalenzgewichtet_N` = 
+    `Sparen imputiert äquivalenzgewichtet_N` = 
       round(sum(!is.na(save_imp_winsor/oecd_weight/3)), digits=2),
+    `Sparquote mit Ersparnis imputiert_N` =
+      round(sum(!is.na(sparquote_winsor), digits=0)),
   ) %>%
   pivot_longer(-c(welle, milo_hh, Variable, Wert)) %>%
   ungroup() %>%

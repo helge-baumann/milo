@@ -8,7 +8,7 @@ EVS <- rbind(
     select(ID, welle, gewicht, westost, bland, EF38, EF35, EF107, EF1,
            paste0("EF", 8:13, "U2"),
            starts_with(
-             c("konsum", "cons", "c_imp", "save", "lohn", "monat", "basis", 
+             c("konsum", "cons", "c_imp", "save", "spar", "lohn", "monat", "basis", 
                "az","stunde", "unterster", "milo_hh", "netto", "brutto", 
                "hhtype", "oecd", "AN", "ET", "sex", "vollzeit", "minijob")))
     ,
@@ -19,7 +19,7 @@ EVS <- rbind(
     select(ID, welle, gewicht, westost, bland, EF38, EF35, EF107, EF1,
            paste0("EF", 8:13, "U2"),
            starts_with(
-             c("konsum", "cons", "c_imp", "save", "lohn", "monat", "basis", 
+             c("konsum", "cons", "c_imp", "save", "spar", "lohn", "monat", "basis", 
                "az", "stunde", "unterster", "milo_hh", "netto", "brutto", 
                "hhtype", "oecd", "AN", "ET", "sex", "vollzeit", "minijob")))
 ) 

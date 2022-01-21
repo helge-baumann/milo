@@ -9,11 +9,14 @@ EVS_defl <- EVS %>%
     lohn_haushalt = if_else(lohn_empfänger == 0, "HH ohne Lohnberechnung", 
                             "HH mit Lohnberechnung"),
     ET_hh = as_factor(rowSums(!is.na(.[paste0("ET_", 1:6)]))),
+    
     # Deflationierung
     lohn_summe_winsor = if_else(
       welle == "2013", lohn_summe_winsor * 1/defl$d2013[13], lohn_summe_winsor),
     brutto_winsor = if_else(
       welle == "2013", brutto_winsor * 1/defl$d2013[13], brutto_winsor),
+    netto_winsor = if_else(
+      welle == "2013", netto_winsor * 1/defl$d2013[13], netto_winsor),
     netto_oecd_winsor = if_else(
       welle == "2013", netto_oecd_winsor * 1/defl$d2013[13], netto_oecd_winsor),
     cons_winsor = if_else(

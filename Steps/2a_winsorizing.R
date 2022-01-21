@@ -14,7 +14,11 @@ evs13 <-
   lohn_summe = rowSums(.[paste0("lohn_", 1:6)], na.rm = T),
   lohn_summe_winsor = winsor(lohn_summe),
   lohn_anteil = if_else(lohn_summe > 0, lohn_summe / brutto * 100, NA_real_),
-  lohn_anteil_winsor = winsor(lohn_anteil)
+  lohn_anteil_winsor = winsor(lohn_anteil),
+  sparquote = if_else((netto - c_imp) * (netto - c_imp) > 0, (netto - c_imp) / netto, NA_real_),
+  sparquote_winsor = winsor(sparquote),
+  konsumquote = if_else(!is.na(sparquote_winsor), 1 - sparquote_winsor, NA_real_),
+  konsumquote_winsor = winsor(konsumquote)
   )
 
 evs18 <- 
@@ -31,7 +35,11 @@ evs18 <-
   lohn_summe = rowSums(.[paste0("lohn_", 1:6)], na.rm = T),
   lohn_summe_winsor = winsor(lohn_summe),
   lohn_anteil = if_else(lohn_summe > 0, lohn_summe / brutto * 100, NA_real_),
-  lohn_anteil_winsor = winsor(lohn_anteil)
+  lohn_anteil_winsor = winsor(lohn_anteil),
+  sparquote = if_else((netto - c_imp) * (netto - c_imp) > 0, (netto - c_imp) / netto, NA_real_),
+  sparquote_winsor = winsor(sparquote),
+  konsumquote = if_else(!is.na(sparquote_winsor), 1 - sparquote_winsor, NA_real_),
+  konsumquote_winsor = winsor(konsumquote)
   )
 
 # Plausibilitätscheck
